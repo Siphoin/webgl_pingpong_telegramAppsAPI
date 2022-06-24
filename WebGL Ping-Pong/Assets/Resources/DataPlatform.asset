@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b272edcf7c41fb448796739384acf7c, type: 3}
   m_Name: DataPlatform
   m_EditorClassIdentifier: 
-  _speed: 300
+  _speed: 500

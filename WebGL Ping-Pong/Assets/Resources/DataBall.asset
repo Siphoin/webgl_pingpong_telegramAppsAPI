@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f9c44d7d299fdb418eca6ddefffd872, type: 3}
   m_Name: DataBall
   m_EditorClassIdentifier: 
-  _speed: 900
+  _speed: 1200

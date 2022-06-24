@@ -44,6 +44,8 @@ public class Ball : MonoBehaviour
 
          _body.velocity = Vector2.zero;
 
+        transform.position = Vector3.zero;
+
 
         float rand = Random.Range(0, 2);
         if (rand < 1)
@@ -52,7 +54,7 @@ public class Ball : MonoBehaviour
         }
         else
         {
-            _body.AddForce(new Vector2(-200, 0));
+            _body.AddForce(new Vector2(-150, 0));
         }
 
         _direction = _body.velocity;
@@ -77,9 +79,6 @@ public class Ball : MonoBehaviour
 
     private void AddForceBall(Collision2D objectCollision)
     {
-        Vector2 vector = Vector2.zero;
-        vector.x = _body.velocity.x;
-        vector.y = (_body.velocity.y / 2) + (objectCollision.collider.attachedRigidbody.velocity.y / 3);
-        _body.velocity = vector;
+        
     }
 }

@@ -1,5 +1,7 @@
 using UnityEngine;
 using System;
+using Photon.Pun;
+
 [RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
 public abstract  class Platform : MonoBehaviour 
@@ -30,6 +32,9 @@ public abstract  class Platform : MonoBehaviour
         }
 
         _dataPlatform = Resources.Load<DataPlatform>(PATH_DATA_PLATFORM);
+
+
+
     }
 
     private void SetVelocity (Vector2 velocity) => _direction = velocity;

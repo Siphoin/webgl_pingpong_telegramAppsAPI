@@ -1,22 +1,36 @@
 using UnityEngine;
-
+using Photon.Pun;
 public class Player : Platform {
 
-    private void Start()  => Init();
+    private PhotonView _view;
+
+    private void Start() 
+    {
+        Init();
+
+        if (!TryGetComponent(out _view)) 
+        {
+           throw new System.NullReferenceException("view component not found on Player!");
+        }
+
+        
+
+        enabled = _view.IsMine;
+    }
     private void Update()
     
     {
         UpdateDirection();
 
 
+        if (Input.GetKey(KeyCode.W)) 
+        {
+             SetUpMove();
+        }
+
         if (Input.GetKey(KeyCode.S)) 
         {
             SetDownMove();
-        }
-
-        if (Input.GetKey(KeyCode.W)) 
-        {
-            SetUpMove();
         }
 
 

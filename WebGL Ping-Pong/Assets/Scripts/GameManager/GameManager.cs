@@ -1,66 +1,158 @@
 using UnityEngine;
 using UnityEngine.Events;
-public class GameManager : MonoBehaviour {
+using Photon.Pun;
+using System;
+using System.Collections.Generic;
+using Photon.Realtime;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+[RequireComponent(typeof(PhotonView))]
+public class GameManager : GameManagerBase, IPunInstantiateMagicCallback
+{
      private long _scoreFirstPlayer;
 
      private long _scoreTwoPlayer;
 
-     public event UnityAction<long, long> OnNewRound;
+    private List<Vector3> _startPositionsObjectsOfArena = new List<Vector3>();
+
+    private List<Transform> _objectsOfArena = new List<Transform>();
+
+    public event UnityAction OnNewRound;
+
+
+
+     [SerializeField]  private Ball _ballPrefab;
+
+     [SerializeField] private Platform _platformPrefab;
+
 
      private Ball _ball;
 
-      Vector3[] _startPositionsObjectsOfArena;
-
-     [SerializeField] private Transform[] _objectsOfArena;
+      private PhotonView _view;
 
      
 
-    [SerializeField] private Transform _line;
-    private void Start() 
+    private void Start()
     {
-        if (!_line)
+
+        if (!TryGetComponent(out _view))
         {
-            throw new System.NullReferenceException("Line not seted");
+            throw new NullReferenceException("photon view component not found on GameManager");
         }
 
-        _ball = FindObjectOfType<Ball>();
-
-        _ball.OnCollisionWall += NewRound;
-
-        _startPositionsObjectsOfArena = new Vector3[_objectsOfArena.Length];
-
-         for (int i = 0; i < _objectsOfArena.Length; i++)
-         {
-             _startPositionsObjectsOfArena[i] = _objectsOfArena[i].position;
-         }
+        StartGame();
 
 
     }
 
-    private void NewRound () 
+    private void StartGame()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            _ball = PhotonNetwork.InstantiateRoomObject(_ballPrefab.name, Vector3.zero, Quaternion.identity).GetComponent<Ball>();
+
+            _ball.OnCollisionWall += NewRound;
+
+
+            for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++)
+            {
+                Photon.Realtime.Player player = PhotonNetwork.PlayerList[i];
+
+                Vector3 position = _positionsOfPlayers[i].position;
+
+                _view.RPC(nameof(CreatePlatform), player, position);
+
+            }
+
+           
+        }
+
+        SetPlayerNameUI("PlayerNameUI1", PhotonNetwork.PlayerList[0].NickName);
+        SetPlayerNameUI("PlayerNameUI2", PhotonNetwork.PlayerList[1].NickName);
+    }
+
+    private void NewRound ()
     {
 
-        if (_ball.transform.position.x < 0) 
+        if (_ball.transform.position.x < 0)
         {
-           _scoreTwoPlayer++;
+            _scoreTwoPlayer++;
         }
 
-        else 
+        else
         {
-           _scoreFirstPlayer++;
+            _scoreFirstPlayer++;
         }
-         for (int i = 0; i < _objectsOfArena.Length; i++)
-         {
-             _objectsOfArena[i].position = _startPositionsObjectsOfArena[i];
-         }
 
-         _ball.ResetBall();
+        _view.RPC(nameof(CalculateScores), RpcTarget.Others, _scoreFirstPlayer, _scoreTwoPlayer);
 
-         OnNewRound?.Invoke(_scoreFirstPlayer, _scoreTwoPlayer);
-         
+
+        for (int i = 0; i < _objectsOfArena.Count; i++)
+        {
+            _objectsOfArena[i].position = _startPositionsObjectsOfArena[i];
+        }
+
+        _ball.ResetBall();
+
+        OnNewRound?.Invoke();
+
+        FindObjectOfType<TextScore>().RefreshText(_scoreFirstPlayer, _scoreTwoPlayer);
+
 
 
     }
+
+    private void SetPlayerNameUI (string tag, string nickName)
+    {
+        GameObject.FindGameObjectWithTag(tag).GetComponent<Text>().text = nickName;
+    }
+    [PunRPC]
+    private void CalculateScores(long scoreFirstPlayer, long scoreThirdPlayer)
+    {
+       
+        _scoreFirstPlayer = scoreFirstPlayer;
+        _scoreTwoPlayer = scoreThirdPlayer;
+
+        FindObjectOfType<TextScore>().RefreshText(_scoreFirstPlayer, _scoreTwoPlayer);
+
+
+    }
+
+    [PunRPC]
+    private void CreatePlatform(Vector3 position) => PhotonNetwork.Instantiate(_platformPrefab.name, position, Quaternion.identity);
+
+    
 
     private void OnDestroy() => _ball.OnCollisionWall -= NewRound;
+
+    public override void OnDisconnected(DisconnectCause cause) => SceneManager.LoadScene("JoinToServer");
+
+    public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
+    {
+        PhotonNetwork.LeaveRoom();
+        SceneManager.LoadScene("Lobby");
+    }
+
+    public void OnPhotonInstantiate(PhotonMessageInfo info)
+    {
+        GameObject gameObject = info.photonView.gameObject;
+
+
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            if (!_ball)
+            {
+                 gameObject.TryGetComponent(out _ball);
+            }
+        }
+
+        _startPositionsObjectsOfArena.Add(gameObject.transform.position);
+
+        _objectsOfArena.Add(gameObject.transform);
+
+
+    }
+
+
 }
