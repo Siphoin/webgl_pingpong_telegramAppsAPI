@@ -77,8 +77,4 @@ public class Ball : MonoBehaviour
            }
     }
 
-    private void AddForceBall(Collision2D objectCollision)
-    {
-        
-    }
 }
