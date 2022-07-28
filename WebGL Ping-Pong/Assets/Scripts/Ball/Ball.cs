@@ -37,10 +37,7 @@ public class Ball : MonoBehaviour
         ResetBall();
     }
 
-    public void ResetBall()
-
-    
-    {
+    public void ResetBall()  {
 
          _body.velocity = Vector2.zero;
 
