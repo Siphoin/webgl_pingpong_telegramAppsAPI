@@ -20,6 +20,7 @@ public class Ball : MonoBehaviour
     private DataBall _dataBall;
 
     private Rigidbody2D _body;
+    
    private void Start()
     {
         if (!TryGetComponent<CircleCollider2D>(out _colider))
