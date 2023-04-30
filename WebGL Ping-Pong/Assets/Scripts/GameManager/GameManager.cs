@@ -10,9 +10,9 @@ using UnityEngine.UI;
 [RequireComponent(typeof(PhotonView))]
 public class GameManager : GameManagerBase, IPunInstantiateMagicCallback
 {
-     private long _scoreFirstPlayer;
+    private long _scoreFirstPlayer;
 
-     private long _scoreTwoPlayer;
+    private long _scoreTwoPlayer;
 
     private List<Vector3> _startPositionsObjectsOfArena = new List<Vector3>();
 
@@ -22,12 +22,12 @@ public class GameManager : GameManagerBase, IPunInstantiateMagicCallback
 
 
 
-     [SerializeField]  private Ball _ballPrefab;
+     [SerializeField]  private readonly Ball _ballPrefab;
 
-     [SerializeField] private Platform _platformPrefab;
+     [SerializeField] private readonly Platform _platformPrefab;
 
 
-     private Ball _ball;
+      private Ball _ball;
 
       private PhotonView _view;
 
@@ -67,6 +67,7 @@ public class GameManager : GameManagerBase, IPunInstantiateMagicCallback
 
            
         }
+        
 
         SetPlayerNameUI("PlayerNameUI1", PhotonNetwork.PlayerList[0].NickName);
         SetPlayerNameUI("PlayerNameUI2", PhotonNetwork.PlayerList[1].NickName);
@@ -107,6 +108,7 @@ public class GameManager : GameManagerBase, IPunInstantiateMagicCallback
     {
         GameObject.FindGameObjectWithTag(tag).GetComponent<Text>().text = nickName;
     }
+    
     [PunRPC]
     private void CalculateScores(long scoreFirstPlayer, long scoreThirdPlayer)
     {
